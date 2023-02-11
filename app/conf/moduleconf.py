@@ -5,13 +5,14 @@ from app.utils.types import *
 class ModuleConf(object):
     # 菜单对应关系，配置WeChat应用中配置的菜单ID与执行命令的对应关系，需要手工修改
     # 菜单序号在https://work.weixin.qq.com/wework_admin/frame#apps 应用自定义菜单中维护，然后看日志输出的菜单序号是啥（按顺利能猜到的）....
-    # 命令对应关系：/ptt 下载文件转移；/ptr 删种；/pts 站点签到；/rst 目录同步；/rss RSS下载；/udt 系统更新
+    # 命令对应关系：/ptt 下载文件转移；/ptr 删种；/pts 站点签到；/rst 目录同步；/rst 豆瓣想看；/utf 重新识别；/rss RSS下载；/udt 系统更新
     WECHAT_MENU = {
         '_0_0': '/ptt',
         '_0_1': '/ptr',
         '_0_2': '/rss',
         '_1_0': '/rst',
         '_1_1': '/db',
+        '_1_2': '/utf',
         '_2_0': '/pts',
         '_2_1': '/udt'
     }
@@ -193,6 +194,14 @@ class ModuleConf(object):
                         "title": "API Key",
                         "tooltip": "在Bark客户端中点击右上角的“...”按钮，选择“生成Bark Key”，然后将生成的KEY填入此处",
                         "type": "text"
+                    },
+                    "params": {
+                        "id": "bark_params",
+                        "required": False,
+                        "title": "附加参数",
+                        "tooltip": "添加到Bark通知中的附加参数，可用于自定义通知特性",
+                        "type": "text",
+                        "placeholder": "group=xxx&sound=xxx&url=xxx"
                     }
                 }
             },
@@ -291,6 +300,14 @@ class ModuleConf(object):
                         "tooltip": "在Slack中创建应用，获取App-Level Token",
                         "type": "text",
                         "placeholder": "xapp-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx"
+                    },
+                    "channel": {
+                        "id": "slack_channel",
+                        "required": False,
+                        "title": "频道名称",
+                        "tooltip": "Slack中的频道名称，默认为全体；需要将机器人添加到该频道，以接收非交互类的通知消息",
+                        "type": "text",
+                        "placeholder": "全体"
                     }
                 }
             },

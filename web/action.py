@@ -86,7 +86,7 @@ class WebAction:
             "check_sync_path": self.__check_sync_path,
             "remove_rss_media": self.__remove_rss_media,
             "add_rss_media": self.__add_rss_media,
-            "re_identification": self.__re_identification,
+            "re_identification": self.re_identification,
             "media_info": self.__media_info,
             "test_connection": self.__test_connection,
             "user_manager": self.__user_manager,
@@ -207,7 +207,8 @@ class WebAction:
             "media_recommendations": self.__media_recommendations,
             "media_person": self.__media_person,
             "person_medias": self.__person_medias,
-            "save_user_script": self.__save_user_script
+            "save_user_script": self.__save_user_script,
+            "run_directory_sync": self.__run_directory_sync
         }
 
     def action(self, cmd, data=None):
@@ -277,6 +278,7 @@ class WebAction:
             "/rst": {"func": Sync().transfer_all_sync, "desp": "目录同步"},
             "/rss": {"func": Rss().rssdownload, "desp": "RSS订阅"},
             "/db": {"func": DoubanSync().sync, "desp": "豆瓣同步"},
+            "/utf": {"func": WebAction().unidentification, "desp": "重新识别"},
             "/udt": {"func": WebAction().update_system, "desp": "系统更新"}
         }
         command = commands.get(msg)
@@ -1436,7 +1438,7 @@ class WebAction:
                     title=name, tmdbid=media_info.tmdb_id)
         return {"code": code, "msg": msg, "page": page, "name": name, "rssid": rssid}
 
-    def __re_identification(self, data):
+    def re_identification(self, data):
         """
         未识别的重新识别
         """
@@ -3773,6 +3775,20 @@ class WebAction:
 
         return {"code": 0, "items": Items}
 
+    def unidentification(self):
+        """
+        重新识别所有未识别记录
+        """
+        ItemIds = []
+        Records = self.dbhelper.get_transfer_unknown_paths()
+        for rec in Records:
+            if not rec.PATH:
+                continue
+            ItemIds.append(rec.ID)
+
+        if len(ItemIds) > 0:
+            WebAction.re_identification(self, {"flag": "unidentification", "ids": ItemIds})
+
     def get_customwords(self, data=None):
         words = []
         words_info = self.dbhelper.get_custom_words(gid=-1)
@@ -3997,7 +4013,7 @@ class WebAction:
         name = data.get("name")
         if path and name:
             try:
-                os.rename(path, os.path.join(os.path.dirname(path), name))
+                shutil.move(path, os.path.join(os.path.dirname(path), name))
             except Exception as e:
                 ExceptionUtils.exception_traceback(e)
                 return {"code": -1, "msg": str(e)}
@@ -4553,3 +4569,11 @@ class WebAction:
                                              "javascript": script
                                          })
         return {"code": 0, "msg": "保存成功"}
+
+    @staticmethod
+    def __run_directory_sync(data):
+        """
+        执行单个目录的目录同步
+        """
+        Sync().transfer_all_sync(sid=data.get("sid"))
+        return {"code": 0, "msg": "执行成功"}

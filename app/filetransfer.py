@@ -395,7 +395,7 @@ class FileTransfer:
             log.error("【Rmt】%s %s到unknown失败，错误码 %s" % (file_item, rmt_mode.value, retcode))
         return retcode
 
-    def __transfer_file(self, file_item, new_file, rmt_mode, over_flag=False):
+    def __transfer_file(self, file_item, new_file, rmt_mode, over_flag=False, old_file=None):
         """
         转移一个文件，同时处理字幕
         :param file_item: 原文件路径
@@ -407,9 +407,9 @@ class FileTransfer:
         if not over_flag and os.path.exists(new_file):
             log.warn("【Rmt】文件已存在：%s" % new_file)
             return 0
-        if over_flag and os.path.isfile(new_file):
-            log.info("【Rmt】正在删除已存在的文件：%s" % new_file)
-            os.remove(new_file)
+        if over_flag and old_file and os.path.isfile(old_file):
+            log.info("【Rmt】正在删除已存在的文件：%s" % old_file)
+            os.remove(old_file)
         log.info("【Rmt】正在转移文件：%s 到 %s" % (file_name, new_file))
         retcode = self.__transfer_command(file_item=file_item,
                                           target_file=new_file,
@@ -500,10 +500,9 @@ class FileTransfer:
                     file_list = [bluray_disk_dir]
                     log.info("【Rmt】当前为蓝光原盘文件夹：%s" % str(in_path))
                 else:
-                    if udf_flag:
-                        # 自定义转移时未输入大小限制默认不限制
-                        now_filesize = 0 if not str(min_filesize).isdigit() else int(
-                            min_filesize) * 1024 * 1024
+                    if str(min_filesize) == "0":
+                        # 不限制大小
+                        now_filesize = 0
                     else:
                         # 未输入大小限制默认为配置大小限制
                         now_filesize = self._min_filesize if not str(min_filesize).isdigit() else int(
@@ -663,13 +662,14 @@ class FileTransfer:
                         exist_filenum = exist_filenum + 1
                         if rmt_mode != RmtMode.SOFTLINK:
                             if media.size > os.path.getsize(ret_file_path) and self._filesize_cover or udf_flag:
-                                ret_file_path = os.path.splitext(ret_file_path)[0]
+                                ret_file_path, ret_file_ext = os.path.splitext(ret_file_path)
                                 new_file = "%s%s" % (ret_file_path, file_ext)
-                                log.info("【Rmt】文件 %s 已存在，覆盖..." % new_file)
+                                old_file = "%s%s" % (ret_file_path, ret_file_ext)
+                                log.info("【Rmt】文件 %s 已存在，覆盖为 %s" % (old_file, new_file))
                                 ret = self.__transfer_file(file_item=file_item,
                                                            new_file=new_file,
                                                            rmt_mode=rmt_mode,
-                                                           over_flag=True)
+                                                           over_flag=True, old_file=old_file)
                                 if ret != 0:
                                     success_flag = False
                                     error_message = "文件转移失败，错误码 %s" % ret
@@ -820,7 +820,8 @@ class FileTransfer:
                                                    scraper_nfo=self._scraper_nfo,
                                                    scraper_pic=self._scraper_pic,
                                                    dir_path=ret_dir_path,
-                                                   file_name=os.path.basename(ret_file_path))
+                                                   file_name=os.path.basename(ret_file_path),
+                                                   file_ext=file_ext)
                 # 更新进度
                 self.progress.update(ptype="filetransfer",
                                      value=round(total_count / len(Medias) * 100),
@@ -1186,6 +1187,7 @@ class FileTransfer:
             "edition": media.get_edtion_string() or None,
             "videoFormat": media.resource_pix,
             "releaseGroup": media.resource_team,
+            "effect": media.resource_effect,
             "videoCodec": media.video_encode,
             "audioCodec": media.audio_encode,
             "tmdbid": media.tmdb_id,

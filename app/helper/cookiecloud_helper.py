@@ -10,7 +10,12 @@ class CookieCloudHelper(object):
     _password = None
 
     def __init__(self, server, key, password):
-        self._server = StringUtils.get_base_url(server)
+        self._server = server
+        if self._server:
+            if not self._server.startswith("http"):
+                self._server = "http://%s" % self._server
+            if self._server.endswith("/"):
+                self._server = self._server[:-1]
         self._key = key
         self._password = password
         self._req = RequestUtils(content_type="application/json")
@@ -22,7 +27,7 @@ class CookieCloudHelper(object):
         if not self._server or not self._key or not self._password:
             return {}, "CookieCloud参数不正确"
         req_url = "%s/get/%s" % (self._server, self._key)
-        ret = self._req.post_res(url=req_url, params=json.dumps({"password": self._password}))
+        ret = self._req.post_res(url=req_url, json={"password": self._password})
         if ret and ret.status_code == 200:
             result = ret.json()
             if not result:
