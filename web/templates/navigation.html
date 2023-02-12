@@ -7,14 +7,12 @@
   {{ HEAD.meta_link() }}
   <title>NAStool - 资源归集、整理自动化工具</title>
   <!-- CSS files -->
-  <link href="../static/css/font-awesome.min.css" rel="stylesheet">
   <link href="../static/css/tabler.min.css" rel="stylesheet"/>
   <link href="../static/css/demo.min.css" rel="stylesheet"/>
   <link href="../static/css/fullcalendar.min.css" rel="stylesheet"/>
   <link href="../static/css/jquery.filetree.css" rel="stylesheet"/>
   <link href="../static/css/dropzone.css" rel="stylesheet"/>
   <link href="../static/css/nprogress.css" rel="stylesheet"/>
-  <link href="../static/css/jsoneditor.min.css" rel="stylesheet"/>
   <!-- 附加样式 -->
   <link href="../static/css/style.css" rel="stylesheet"/>
   <!-- 站点图标 -->
@@ -77,7 +75,7 @@
       <div class="card border-0" style="overflow:hidden">
         <div class="progress rounded-0">
           <div class="progress-bar progress-bar-striped progress-bar-animated" id="modal_process_bar"
-               style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+               style="width: 0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
         <div class="card-body text-center">
           <h3 class="card-title strong" id="modal_process_title">
@@ -1871,9 +1869,6 @@
       syncmod = '{{ SyncMod }}';
     }
     let source = CURRENT_PAGE_URI;
-    if (source === 'mediafile') {
-      source = `mediafile?dir=${inpath}`;
-    }
     $("#rename_source").val(source);
     $("#rename_manual_type").val(manual_type);
     if (manual_type === 3) {
