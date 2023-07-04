@@ -44,6 +44,7 @@ from web.backend.user import User
 from web.backend.wallpaper import get_login_wallpaper
 from web.backend.web_utils import WebUtils
 from web.security import require_auth
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # 配置文件锁
 ConfigLock = Lock()
@@ -53,6 +54,7 @@ App = Flask(__name__)
 App.config['JSON_AS_ASCII'] = False
 App.secret_key = os.urandom(24)
 App.permanent_session_lifetime = datetime.timedelta(days=30)
+App.wsgi_app = ProxyFix(App.wsgi_app, x_for=1, x_host=1, x_prefix=1)
 
 # 启用压缩
 Compress(App)

@@ -1069,7 +1069,7 @@ class FileTransfer:
             # 已存在的集
             exists_episodes = []
             for dest_path in dest_paths:
-                if category_flag:
+                if category_flag and meta_info.category:
                     dest_path = os.path.join(dest_path, meta_info.category, dir_name, season_name)
                 else:
                     dest_path = os.path.join(dest_path, dir_name, season_name)
